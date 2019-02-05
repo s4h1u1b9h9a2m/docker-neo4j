@@ -1,0 +1,27 @@
+version: '3.3'
+
+volumes:
+  neo4j-graphite:
+
+services:
+  grafana:
+    image: iborojevic/grafana-neo4j
+    volumes:
+      - type: volume
+        source: neo4j-graphite
+        target: /data
+    environment:
+      - SECRET_KEY=mysecret
+    ports:
+      - target: 3000
+        published: 3000
+        protocol: tcp
+        mode: host
+      - target: 2003
+        published: 2003
+        protocol: tcp
+        mode: host
+      # - target: 2003
+      #   published: 2003
+      #   protocol: tcp
+      #   mode: host

@@ -1,0 +1,73 @@
+version: '3.3'
+
+networks:
+  neo4j_lan:
+    external: true
+
+volumes:
+  neo-read-data1:
+
+services:
+
+  readreplica1:
+    image: neo4j:3.4-enterprise
+    volumes:
+      - type: volume
+        source: neo-read-data1
+        target: /data
+      - type: bind
+        source: ./plugin
+        target: /plugins
+        read_only: true
+      - type: bind
+        source: ./config
+        target: /conf
+        read_only: true
+    networks:
+      - neo4j_lan
+    environment:
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+      - NEO4J_dbms_memory_pagecache_size=10M
+      - NEO4J_dbms_memory_heap_initial__size=10M
+      - NEO4J_AUTH=neo4j/neo4j
+      - NEO4J_dbms_mode=READ_REPLICA
+      - NEO4J_causalClustering_initialDiscoveryMembers=core1:5000,core2:5000,core3:5000
+      - NEO4J_dbms_connectors_default__advertised__address=readreplica1
+      # - NEO4J_dbms_connector_http_listen__address=:7504
+      # - NEO4J_dbms_connector_https_listen__address=:7473
+      # - NEO4J_dbms_connector_bolt_listen__address=:7717
+      - NEO4J_dbms_connector_http_listen__address=:7474
+      - NEO4J_dbms_connector_https_listen__address=:7473
+      - NEO4J_dbms_connector_bolt_listen__address=:7687
+
+      - NEO4J_metrics_enabled=true
+      - NEO4J_metrics_graphite_enabled=true
+      - NEO4J_metrics_graphite_interval=3s
+      - NEO4J_metrics_graphite_server=0.0.0.0:2003
+      - NEO4J_metrics_jvm_buffers_enabled=true
+      - NEO4J_metrics_jvm_gc_enabled=true
+      - NEO4J_metrics_jvm_memory_enabled=true
+      - NEO4J_metrics_jvm_threads_enabled=true
+      # - NEO4J_metrics_neo4j_causal_clustering_enabled=true
+      - NEO4J_metrics_neo4j_checkpointing_enabled=true
+      # - NEO4J_metrics_neo4j_cluster_enabled=true
+      - NEO4J_metrics_neo4j_counts_enabled=true
+      - NEO4J_metrics_neo4j_enabled=true
+      - NEO4J_metrics_neo4j_logrotation_enabled=true
+      - NEO4J_metrics_neo4j_network_enabled=true
+      - NEO4J_metrics_neo4j_pagecache_enabled=true
+      - NEO4J_metrics_neo4j_server_enabled=true
+      - NEO4J_metrics_neo4j_tx_enabled=true
+      - NEO4J_metrics_prefix=Neo4j_4
+    deploy:
+      # mode: global
+      endpoint_mode: dnsrr
+    # ports:
+    #   - target: 7504
+    #     published: 7504
+    #     protocol: tcp
+    #     mode: host
+    #   - target: 7717
+    #     published: 7717
+    #     protocol: tcp
+    #     mode: host

@@ -1,0 +1,22 @@
+version: '3.3'
+
+networks:
+  neo4j_lan:
+    external: true
+
+services:
+  haproxy:
+    image: haproxy
+    networks:
+      - neo4j_lan
+    volumes: 
+      - './haproxy.conf:/usr/local/etc/haproxy/haproxy.cfg:ro'  
+    ports:
+      # - target: 7474
+      #   published: 7474
+      #   protocol: tcp
+      #   mode: host
+      - target: 7687
+        published: 7687
+        protocol: tcp
+        mode: host

@@ -1,0 +1,111 @@
+version: '3.2'
+
+services:
+    aerospikedb:
+        image: aerospike/aerospike-server:latest
+        networks:
+        - aerospikenetwork
+        environment:
+          - SERVICE_PORTS=3000
+        ports:
+          - target: 3000
+            published: 3000
+            protocol: tcp
+            mode: host
+        deploy:
+            replicas: 4
+            endpoint_mode: dnsrr
+        labels:
+            com.aerospike.description: "This label is for all containers for the Aerospike service"
+        command: [ "--config-file","/run/secrets/aerospike.conf"]
+        secrets:
+        - source: conffile
+          target: aerospike.conf
+          mode: 0440
+        deploy:
+          placement:
+            constraints: [node.role == worker]
+    
+    meshworker:
+        image: aerospike/aerospike-tools:latest
+        networks:
+        - aerospikenetwork
+        depends_on:
+        - aerospike
+        entrypoint:
+        - /run/secrets/discovery
+        - "--servicename"
+        - aerospikedb
+        - "-i"
+        - "5"
+        - "-v"
+        secrets:
+        - source: discoveryfile
+          target: discovery
+          mode: 0750
+        deploy:
+          placement:
+            constraints: [node.role == manager]
+    visualizer:
+        image: dockersamples/visualizer:stable
+        ports:
+          - "8080:8080"
+        stop_grace_period: 1m30s
+        volumes:
+          - "/var/run/docker.sock:/var/run/docker.sock"
+        deploy:
+          placement:
+            constraints: [node.role == manager]
+    proxy:
+        image: dockercloud/haproxy
+        # Won't start until at least one of our app services is up and running.
+        depends_on:
+          - aerospikedb
+        environment:
+          # The type of load balancing strategy that will be used.
+          # - leastconn sends request to the service with the least active requests.
+          # - roundrobin rotates the requests around the services.
+          - BALANCE=leastconn
+          # Used to identify services.
+          - ADDITIONAL_SERVICES=project_dir:aerospikedb
+          - MODE=tcp
+          - STATS_PORT=1936
+          - STATS_AUTH="admin:admin"
+        volumes:
+          # Since our app services are running on the same port,
+          # the HAProxy will use the docker.sock to find the
+          # services that it should load balance.
+          - /var/run/docker.sock:/var/run/docker.sock
+        ports:
+          # The internal used by the HAProxy is 80,
+          # but we can expose any port that we would like externally.
+          # For example, if you are running something else on 80,
+          # you probably don't want to expose the HAProxy on 80 as well.
+          - 80:80
+          - 1936:1936
+          #- 8080:8083
+         # - 8081:8084
+        networks:
+          - aerospikenetwork
+        deploy:
+          # The HAProxy is assigned as the manager.
+          placement:
+            constraints: [node.role == manager]
+    amc:
+        image: apsops/aerospike-amc:v4.0.19
+        ports:
+          - "8081:8081"
+        deploy:
+          placement:
+            constraints: [node.role == manager]
+
+networks:
+    aerospikenetwork:
+        driver: overlay
+        attachable: true
+
+secrets:
+    conffile:
+        file: ./aerospike.conf
+    discoveryfile:
+        file: ./discovery.py

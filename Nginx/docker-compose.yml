@@ -1,0 +1,33 @@
+version: '3.3'
+
+networks:
+  neo4j_lan:
+    external: true
+
+configs:
+  # nginx_stream_config:
+  #   file: ./nginx.stream.conf
+  nginx_http_config:
+    file: ./nginx.http.conf
+
+services:
+  nginx:
+    image: tekn0ir/nginx-stream
+    configs:
+      - source: nginx_http_config
+        target: /opt/nginx/http.conf.d/nginx_http_config.conf
+        mode: 0440
+      # - source: nginx_stream_config
+      #   target: /opt/nginx/stream.conf.d/nginx_stream_config.conf
+      #   mode: 0440
+    networks:
+      - neo4j_lan
+    ports:
+      - target: 7474
+        published: 7474
+        protocol: tcp
+        mode: host
+      # - target: 7687
+      #   published: 7687
+      #   protocol: tcp
+      #   mode: host

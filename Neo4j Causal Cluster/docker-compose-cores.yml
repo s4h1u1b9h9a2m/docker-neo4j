@@ -1,0 +1,222 @@
+version: '3.3'
+
+networks:
+  lan:
+    driver: overlay
+
+volumes:
+  neo-core-data1:
+  # neo-core-logs1:
+  neo-core-data2:
+  # neo-core-logs2:
+  neo-core-data3:
+  # neo-core-logs3:
+
+services:
+
+  core1:
+    image: neo4j:3.4-enterprise
+    volumes:
+      - type: volume
+        source: neo-core-data1
+        target: /data
+      - type: bind
+        source: ./plugin
+        target: /plugins
+        read_only: true
+      - type: bind
+        source: ./config
+        target: /conf
+        read_only: true
+    networks:
+      - lan
+    environment:
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+      - NEO4J_dbms_memory_pagecache_size=10M
+      - NEO4J_dbms_memory_heap_initial__size=10M
+      - NEO4J_AUTH=neo4j/neo4j
+      - NEO4J_dbms_mode=CORE
+      - NEO4J_causal__clustering_minimum__core__cluster__size__at__formation=3
+      - NEO4J_causal__clustering_minimum__core__cluster__size__at__runtime=3
+      - NEO4J_causalClustering_initialDiscoveryMembers=core1:5000,core2:5000,core3:5000
+      - NEO4J_causal__clustering_discovery__advertised__address=core1:5000
+      - NEO4J_causal__clustering_transaction__advertised__address=core1:6000
+      - NEO4J_causal__clustering_raft__advertised__address=core1:7000
+      - NEO4J_dbms_connectors_default__advertised__address=0.0.0.0
+      - NEO4J_dbms_connector_http_listen__address=:7474
+      - NEO4J_dbms_connector_https_listen__address=:7473
+      # - NEO4J_dbms_connector_bolt_listen__address=:7687
+      # - NEO4J_dbms_connector_http_listen__address=:7474
+      # - NEO4J_dbms_connector_https_listen__address=:7473
+      - NEO4J_dbms_connector_bolt_listen__address=:7727
+
+      - NEO4J_metrics_enabled=true
+      - NEO4J_metrics_graphite_enabled=true
+      - NEO4J_metrics_graphite_interval=3s
+      - NEO4J_metrics_graphite_server=0.0.0.0:2003
+      - NEO4J_metrics_jvm_buffers_enabled=true
+      - NEO4J_metrics_jvm_gc_enabled=true
+      - NEO4J_metrics_jvm_memory_enabled=true
+      - NEO4J_metrics_jvm_threads_enabled=true
+      - NEO4J_metrics_neo4j_causal_clustering_enabled=true
+      - NEO4J_metrics_neo4j_checkpointing_enabled=true
+      - NEO4J_metrics_neo4j_cluster_enabled=true
+      - NEO4J_metrics_neo4j_counts_enabled=true
+      - NEO4J_metrics_neo4j_enabled=true
+      - NEO4J_metrics_neo4j_logrotation_enabled=true
+      - NEO4J_metrics_neo4j_network_enabled=true
+      - NEO4J_metrics_neo4j_pagecache_enabled=true
+      - NEO4J_metrics_neo4j_server_enabled=true
+      - NEO4J_metrics_neo4j_tx_enabled=true
+      - NEO4J_metrics_prefix=Neo4j_1
+    deploy:
+      # mode: global
+      endpoint_mode: dnsrr
+    ports:
+    #   - target: 7474
+    #     published: 7474
+    #     protocol: tcp
+    #     mode: host
+      - target: 7727
+        published: 7727
+        protocol: tcp
+        mode: host
+  core2:
+    image: neo4j:3.4-enterprise
+    # restart: always
+    volumes:
+      - type: volume
+        source: neo-core-data2
+        target: /data
+      - type: bind
+        source: ./plugin
+        target: /plugins
+        read_only: true
+      - type: bind
+        source: ./config
+        target: /conf
+        read_only: true
+    networks:
+      - lan
+    environment:
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+      - NEO4J_dbms_memory_pagecache_size=10M
+      - NEO4J_dbms_memory_heap_initial__size=10M
+      - NEO4J_AUTH=neo4j/neo4j
+      - NEO4J_dbms_mode=CORE
+      - NEO4J_causal__clustering_minimum__core__cluster__size__at__formation=3
+      - NEO4J_causal__clustering_minimum__core__cluster__size__at__runtime=3
+      - NEO4J_causalClustering_initialDiscoveryMembers=core1:5000,core2:5000,core3:5000
+      - NEO4J_causal__clustering_discovery__advertised__address=core2:5000
+      - NEO4J_causal__clustering_transaction__advertised__address=core2:6000
+      - NEO4J_causal__clustering_raft__advertised__address=core2:7000
+      - NEO4J_dbms_connectors_default__advertised__address=0.0.0.0
+      # - NEO4J_dbms_connector_http_listen__address=:7484
+      # - NEO4J_dbms_connector_https_listen__address=:7473
+      - NEO4J_dbms_connector_bolt_listen__address=:7697
+      - NEO4J_dbms_connector_http_listen__address=:7474
+      - NEO4J_dbms_connector_https_listen__address=:7473
+      # - NEO4J_dbms_connector_bolt_listen__address=:7687
+
+      - NEO4J_metrics_enabled=true
+      - NEO4J_metrics_graphite_enabled=true
+      - NEO4J_metrics_graphite_interval=3s
+      - NEO4J_metrics_graphite_server=0.0.0.0:2003
+      - NEO4J_metrics_jvm_buffers_enabled=true
+      - NEO4J_metrics_jvm_gc_enabled=true
+      - NEO4J_metrics_jvm_memory_enabled=true
+      - NEO4J_metrics_jvm_threads_enabled=true
+      - NEO4J_metrics_neo4j_causal_clustering_enabled=true
+      - NEO4J_metrics_neo4j_checkpointing_enabled=true
+      - NEO4J_metrics_neo4j_cluster_enabled=true
+      - NEO4J_metrics_neo4j_counts_enabled=true
+      - NEO4J_metrics_neo4j_enabled=true
+      - NEO4J_metrics_neo4j_logrotation_enabled=true
+      - NEO4J_metrics_neo4j_network_enabled=true
+      - NEO4J_metrics_neo4j_pagecache_enabled=true
+      - NEO4J_metrics_neo4j_server_enabled=true
+      - NEO4J_metrics_neo4j_tx_enabled=true
+      - NEO4J_metrics_prefix=Neo4j_2
+    deploy:
+      # mode: global
+      endpoint_mode: dnsrr
+    ports:
+      # - target: 7484
+      #   published: 7484
+      #   protocol: tcp
+      #   mode: host
+      - target: 7697
+        published: 7697
+        protocol: tcp
+        mode: host
+  core3:
+    image: neo4j:3.4-enterprise
+    # restart: always
+    volumes:
+      - type: volume
+        source: neo-core-data3
+        target: /data
+      - type: bind
+        source: ./plugin
+        target: /plugins
+        read_only: true
+      - type: bind
+        source: ./config
+        target: /conf
+        read_only: true
+    networks:
+      - lan
+    environment:
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+      - NEO4J_dbms_memory_pagecache_size=10M
+      - NEO4J_dbms_memory_heap_initial__size=10M
+      - NEO4J_AUTH=neo4j/neo4j
+      - NEO4J_dbms_mode=CORE
+      - NEO4J_causalClustering_discoveryAdvertisedAddress=core3:5000
+      - NEO4J_causalClustering_transactionAdvertisedAddress=core3:6000
+      - NEO4J_causalClustering_raftAdvertisedAddress=core3:7000
+      - NEO4J_causal__clustering_minimum__core__cluster__size__at__formation=3
+      - NEO4J_causal__clustering_minimum__core__cluster__size__at__runtime=3
+      - NEO4J_causalClustering_initialDiscoveryMembers=core1:5000,core2:5000,core3:5000
+      - NEO4J_causal__clustering_discovery__advertised__address=core3:5000
+      - NEO4J_causal__clustering_transaction__advertised__address=core3:6000
+      - NEO4J_causal__clustering_raft__advertised__address=core3:7000
+      - NEO4J_dbms_connectors_default__advertised__address=0.0.0.0
+      # - NEO4J_dbms_connector_http_listen__address=:7494
+      # - NEO4J_dbms_connector_https_listen__address=:7473
+      - NEO4J_dbms_connector_bolt_listen__address=:7707
+      - NEO4J_dbms_connector_http_listen__address=:7474
+      - NEO4J_dbms_connector_https_listen__address=:7473
+      # - NEO4J_dbms_connector_bolt_listen__address=:7687
+
+      - NEO4J_metrics_enabled=true
+      - NEO4J_metrics_graphite_enabled=true
+      - NEO4J_metrics_graphite_interval=3s
+      - NEO4J_metrics_graphite_server=0.0.0.0:2003
+      - NEO4J_metrics_jvm_buffers_enabled=true
+      - NEO4J_metrics_jvm_gc_enabled=true
+      - NEO4J_metrics_jvm_memory_enabled=true
+      - NEO4J_metrics_jvm_threads_enabled=true
+      - NEO4J_metrics_neo4j_causal_clustering_enabled=true
+      - NEO4J_metrics_neo4j_checkpointing_enabled=true
+      - NEO4J_metrics_neo4j_cluster_enabled=true
+      - NEO4J_metrics_neo4j_counts_enabled=true
+      - NEO4J_metrics_neo4j_enabled=true
+      - NEO4J_metrics_neo4j_logrotation_enabled=true
+      - NEO4J_metrics_neo4j_network_enabled=true
+      - NEO4J_metrics_neo4j_pagecache_enabled=true
+      - NEO4J_metrics_neo4j_server_enabled=true
+      - NEO4J_metrics_neo4j_tx_enabled=true
+      - NEO4J_metrics_prefix=Neo4j_3
+    deploy:
+      # mode: global
+      endpoint_mode: dnsrr
+    ports:
+    #   - target: 7494
+    #     published: 7494
+    #     protocol: tcp
+    #     mode: host
+      - target: 7707
+        published: 7707
+        protocol: tcp
+        mode: host
