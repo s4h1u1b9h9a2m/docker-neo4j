@@ -1,0 +1,16 @@
+version: '3.1'
+
+volumes:
+  postgres-data-columnar:
+
+services:
+
+  db:
+    image: mnementh64/docker-postgresql-cstore
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: LFYGgMeujbH6uW3
+    volumes:
+      - postgres-data-columnar:/var/lib/postgresql/data

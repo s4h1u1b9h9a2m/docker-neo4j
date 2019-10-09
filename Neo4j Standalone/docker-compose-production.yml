@@ -22,6 +22,9 @@ services:
       - type: bind
         source: /var/lib/neo4j/conf
         target: /conf
+      - type: bind
+        source: /var/lib/neo4j/logs
+        target: /logs
     environment: 
       - NEO4J_AUTH=neo4j/neo4j
       - NEO4J_dbms_mode=SINGLE
@@ -46,6 +49,11 @@ services:
       - NEO4J_metrics_neo4j_tx_enabled=true
       - NEO4J_metrics_prefix=Neo4j_1
       - NEO4J_dbms_connectors_default__advertised__address=0.0.0.0
+      #- NEO4J_dbms_jvm_additional="-Xms=4024m -Xmx=8048m"
+      - NEO4J_dbms_transaction_timeout=600s
+      - NEO4J_dbms_memory_heap_initial__size=5000M
+      - NEO4J_dbms_memory_heap_max__size=5000M
+      - NEO4J_dbms_memory_pagecache_size=6400M
     deploy: 
       replicas: 1
       resources: 

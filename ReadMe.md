@@ -47,3 +47,10 @@ docker stack deploy neo4j --compose-file docker-compose.yml
 ```
 docker-compose up
 ```
+
+### Mounting neo4j to new instance
+mkdir /var/lib/neo4j
+mount  /dev/xvdf /var/lib/neo4j
+umount /dev/xvdf
+
+mount  /dev/xvdg /var/lib/neo4j
